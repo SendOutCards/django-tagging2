@@ -55,7 +55,7 @@ setup(
     version = tagging.get_version(),
     description = 'Generic tagging application for Django',
     author = 'Jonathan Buchanan, Aaron Allred',
-    author_email = 'digicyc@gmail.com',
+    author_email = 'digicyc <at> gmail - DoT - com',
     url = 'https://github.com/digicyc/django-tagging2',
     packages = packages,
     data_files = data_files,
