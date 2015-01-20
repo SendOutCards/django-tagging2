@@ -163,12 +163,19 @@ class TagManager(models.Manager):
         """
 
         if getattr(queryset.query, 'get_compiler', None):
-            # Django 1.2+
             compiler = queryset.query.get_compiler(using='default')
+
+            if getattr(compiler, 'compile', None):
+                # Django 1.7+
+                where, params = compiler.compile(queryset.query.where)
+
+            else:
+                # Django 1.2+
+                where, params = queryset.query.where.as_sql(
+                    compiler.quote_name_unless_alias, compiler.connection)
+
             extra_joins = ' '.join(compiler.get_from_clause()[0][1:])
-            where, params = queryset.query.where.as_sql(
-                compiler.quote_name_unless_alias, compiler.connection
-            )
+
         else:
             # Django pre-1.2
             extra_joins = ' '.join(queryset.query.get_from_clause()[0][1:])
@@ -176,8 +183,10 @@ class TagManager(models.Manager):
 
         if where:
             extra_criteria = 'AND %s' % where
+
         else:
             extra_criteria = ''
+
         return self._get_usage(queryset.model, counts, min_count, extra_joins, extra_criteria, params)
 
     def related_for_model(self, tags, model, counts=False, min_count=None):
